@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ReceiptGen"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
-    <Grid>
-        
+        Title="MainWindow" Height="511.783" Width="1117.583" WindowState="Maximized" WindowStartupLocation="CenterScreen">
+    <Grid Margin="0,0,0.2,-19.6">
+        <Image x:Name="image" HorizontalAlignment="Left" Height="482"  Margin="10,10,0,0" VerticalAlignment="Top" Width="1101" Stretch="Fill"/>
     </Grid>
 </Window>
