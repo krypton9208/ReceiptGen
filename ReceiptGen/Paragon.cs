@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using System.Linq;
@@ -10,7 +11,7 @@ using System.Windows.Controls;
 
 namespace ReceiptGen
 {
-    public enum VAT {A, B } 
+    public enum VAT { A, B }
     public class Zakupy
     {
         private double ilosc { get; set; }
@@ -24,64 +25,122 @@ namespace ReceiptGen
             Cena = cena;
             Podatek = pod;
         }
-
         public double GetCena
         {
             get { return Cena; }
         }
     }
+
+    public class Linia
+    {
+        private TypWyrowniania Wyrownaj { get; set; }
+        private string Text { get; set; }
+        private MiejsceLini Typ { get; set; }
+        private WielkoscLini Rozmiar { get; set; }
+        private GruboscLini Grubosc { get; set; }
+        private int SzerokoscLini { get; set; }
+        char znak = '-';
+
+        public Linia(string text, TypWyrowniania wyrownaj, MiejsceLini typ, WielkoscLini rozmiar, GruboscLini grubosc, int szerokosclini)
+        {
+            Text = text;
+            Wyrownaj = wyrownaj;
+            Typ = typ;
+            Rozmiar = rozmiar;
+            Grubosc = grubosc;
+            SzerokoscLini = szerokosclini;
+        }
+
+        private string Akcja
+        {
+            get
+            {
+                switch (Wyrownaj)
+                {
+                    case TypWyrowniania.DoLewej:
+                        {
+                            //string empty = String.Empty;
+                            //empty += Text;
+                            //for (int i = 0; i < SzerokoscLini - Text.Length; i++)
+                            //{
+                            //    empty += znak;
+                            //}
+                            //return empty;
+                            return Text.PadRight(SzerokoscLini+2, znak);
+                        }
+                    case TypWyrowniania.DoPrawej:
+                        {
+                            //string empty = String.Empty;
+                            //for (int i = 0; i < SzerokoscLini - Text.Length; i++)
+                            //{
+                            //    empty += znak;
+                            //}
+                            //return empty += Text;
+                            return Text.PadLeft(SzerokoscLini+2, znak);
+                        }
+                    case TypWyrowniania.DoSrodka:
+                        {
+                            string empty = String.Empty;
+                            int IlePoLewej = 0, IlePoPrawej = 0;
+                            if (Text.Length % 2 == 0)
+                            {
+                                IlePoLewej = SzerokoscLini / 2;
+                                IlePoLewej -= Text.Length / 2;
+                                IlePoPrawej = IlePoLewej;
+                            }
+                            else
+                            {
+                                IlePoLewej = SzerokoscLini / 2;
+                                IlePoLewej -= Text.Length / 2;
+                                IlePoPrawej = IlePoLewej - 1;
+                            }
+                            for (int i = 0; i <= IlePoLewej; i++)
+                            {
+                                empty += znak;
+                            }
+                            empty += Text;
+                            for (int i = 0; i <= IlePoPrawej; i++)
+                            {
+                                empty += znak;
+                            }
+                            return empty;
+                        }
+                    case TypWyrowniania.DoKrawedzi:
+                        {
+                            string empty = String.Empty;
+                            for (int i = 0; i <= SzerokoscLini - Text.Length+2; i++)
+                            {
+                                empty += znak;
+                            }
+                            empty = Text.Replace(";", empty);
+                            return empty;
+                        }
+                }
+                return string.Empty;
+            }
+        }
+
+        public string GetContent => Akcja;
+    }
+
+    public enum TypWyrowniania { DoLewej, DoPrawej, DoSrodka, DoKrawedzi }
+    public enum MiejsceLini { Naglowek, Stopka }
+    public enum WielkoscLini { Mala, Srednia, Duza }
+    public enum GruboscLini { Normalna, Gruba }
+
     public class Paragon
     {
         private string Tytuł { get; set; }
         public int szerokoscParagonu { get; set; }
-        private string WyrownajNaglowek(string text)
-        {
-            char znak  = '-';
-            string temp1 = "";
-            if (text.Length % 2 == 0)
-            {
-                int ilespacji = szerokoscParagonu - text.Length;
-                ilespacji -= text.Length/2;
-                ilespacji /= 2;
-                for (int i = 0; i < ilespacji; i++)
-                {
-                    temp1 += znak;
-                }
-                temp1 += text;
-                for (int i = 0; i < ilespacji; i++)
-                {
-                    temp1 += znak;
-                }
-            }
-            else
-            {
-                int ilespacji = szerokoscParagonu - text.Length;
-                ilespacji -= text.Length / 2;
-                ilespacji /= 2;
-                ilespacji++;
-                for (int i = 0; i < ilespacji; i++)
-                {
-                    temp1 += znak;
-                }
-                temp1 += text;
-                for (int i = 0; i < ilespacji - 1; i++)
-                {
-                    temp1 += znak;
-                }
-            }
-            return temp1;
-        }
-        private List<Zakupy> Lista { get; set; } 
-        public void DodajTytuł(string linia1, string linia2, string linia3, string linia4, string linia5,string linia6)
-        {
-            szerokoscParagonu = 72;
-            Tytuł = WyrownajNaglowek(linia1) + "\n" + WyrownajNaglowek(linia2) + "\n" + WyrownajNaglowek(linia3) +
-                "\n" + WyrownajNaglowek(linia4) + "\n" + WyrownajNaglowek(linia5) + "\n" + WyrownajNaglowek(linia6);
-        }
+        public List<Linia> Linie { get; set; }
+        public List<Zakupy> Lista { get; set; }
+
+
 
         public Paragon(int szer)
         {
             Lista = new List<Zakupy>();
+            Linie = new List<Linia>();
             szerokoscParagonu = szer;
         }
 
@@ -89,17 +148,21 @@ namespace ReceiptGen
         {
             get
             {
-                double temp = 0;
-                foreach (var item in Lista)
-                {
-                    temp += item.GetCena;
-                }
-                return temp;
+                return Lista.Sum(item => item.GetCena);
             }
         }
         public string GetTytul
         {
-            get { return Tytuł; }
+            get
+            {
+                string empty = string.Empty;
+                foreach (var item in Linie)
+                {
+                    empty += item.GetContent;
+                    empty += "\n";
+                }
+                return empty;
+            }
         }
 
     }
