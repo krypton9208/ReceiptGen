@@ -7,6 +7,6 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="511.783" Width="1117.583" WindowState="Maximized" WindowStartupLocation="CenterScreen">
     <Grid Margin="0,0,0.2,-19.6">
-        <Image x:Name="image" HorizontalAlignment="Left" Height="482"  Margin="10,10,0,0" VerticalAlignment="Top" Width="1101" Stretch="Fill"/>
+        <Image x:Name="image" HorizontalAlignment="Left" Height="482"  Margin="10,10,0,0" VerticalAlignment="Top" Width="1800" Stretch="None"/>
     </Grid>
 </Window>
